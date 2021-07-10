@@ -25,12 +25,12 @@ public class JVMMonitor {
     private static final Logger LOGGER = LoggerFactory.getLogger(JVMMonitor.class);
 
     private static final MBeanServer MBEAN_SERVER = ManagementFactory.getPlatformMBeanServer();
-    private static final AtomicBoolean start = new AtomicBoolean(false);
+    private static final AtomicBoolean START = new AtomicBoolean(false);
 
     private final static Map<String, Object> MONITOR_MAP = new HashMap<String, Object>();
 
     public static void start() {
-        if (start.compareAndSet(false, true)) {
+        if (START.compareAndSet(false, true)) {
             if (MONITOR_MAP.size()<1) {
                 MONITOR_MAP.put(JVMConstants.JMX_JVM_INFO_NAME, JVMInfo.getInstance());
                 MONITOR_MAP.put(JVMConstants.JMX_JVM_MEMORY_NAME, JVMMemory.getInstance());
@@ -52,7 +52,7 @@ public class JVMMonitor {
     }
 
     public static void stop() {
-        if (start.compareAndSet(true, false) ) {
+        if (START.compareAndSet(true, false) ) {
             for (Map.Entry<String, Object> entry : MONITOR_MAP.entrySet()) {
                 try {
                     ObjectName objectName = new ObjectName(entry.getKey());
@@ -81,15 +81,6 @@ public class JVMMonitor {
             LOGGER.error("get Attribute error, objectName=" + objectName + ", attributeName=" + attributeNames, e);
         }
         return result;
-    }
-
-    public static Object getAttribute(String objectName, String attributeName) {
-        try {
-            return MBEAN_SERVER.getAttribute(new ObjectName(objectName), attributeName);
-        } catch (Exception e) {
-            LOGGER.error("get Attribute error, objectName=" + objectName + ", attributeName=" + attributeName, e);
-        }
-        return null;
     }
 
 }

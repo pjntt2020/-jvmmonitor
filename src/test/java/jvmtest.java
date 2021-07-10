@@ -23,7 +23,7 @@ public class jvmtest {
             public void run() {
                 System.out.println(">>>>>>>>>>");
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
