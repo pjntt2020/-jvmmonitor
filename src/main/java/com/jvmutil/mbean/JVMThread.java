@@ -3,6 +3,8 @@ package com.jvmutil.mbean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
@@ -96,4 +98,42 @@ public class JVMThread implements JVMThreadMBean {
         }
     }
 
+    
+    @Override
+	public String toString() {
+
+		StringBuffer result = new StringBuffer();
+		try {
+			Class<? extends JVMThread> clazz = this.getClass();
+			// 获取当前类的全部属性
+			Field[] fields = clazz.getDeclaredFields();
+			for (Field field : fields) {
+				// 遍历属性得到属性名
+				String fieldName = field.getName();
+				// 如果是用于序列化的直接过滤掉
+				if ("serialVersionUID".equals(fieldName)) {
+					continue;
+				}
+				// 判断属性的类型，主要是区分boolean和其他类型
+				Class<?> type = field.getType();
+
+				// boolean的取值是is,其他是get
+				String methodName = (type.getTypeName().equals("boolean") ? "is" : "get")
+						+ fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1, fieldName.length());
+				
+				// 通过方法名得到方法对象
+				Method method = clazz.getMethod(methodName);
+				// 得到这个方法的返回值
+				Object resultObj = method.invoke(this);
+				if (resultObj != null && !"".equals(resultObj)) {
+					result.append(fieldName).append(":").append(resultObj).append("|");
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return result.toString();
+	}
 }
